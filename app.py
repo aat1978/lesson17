@@ -74,7 +74,7 @@ genres_schema = GenreSchema(many=True)
 
 @movie_ns.route("/")
 class MoviesView(Resource):
-    def get(self):
+    def get(self, page=1):
         movies_query = db.session.query(Movie)
         director_id = request.args.get("director_id")
         if director_id is not None:
@@ -82,7 +82,8 @@ class MoviesView(Resource):
         genre_id = request.args.get("genre_id")
         if genre_id is not None:
             movies_query = movies_query.filter(Movie.genre_id == genre_id)
-        return movies_schema.dump(movies_query.all()), 200
+        movies = movies_query.paginate(page, per_page=5)
+        return movies_schema.dump(movies.items), 200
 
     def post(self):
         request_json = request.json
